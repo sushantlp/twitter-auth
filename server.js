@@ -55,6 +55,8 @@ app.use(robots(path.join(__dirname, "public", "robots.txt")));
 app.disable("etag");
 
 
+// Controllers (route handlers).
+const database = require("./controllers/databaseController");
 
 router.route('/' , (req, res)  => {
   res.status(200);
@@ -66,7 +68,7 @@ router.route('/' , (req, res)  => {
 
 
 // Call Sequelize Connection
-//database.sequelizeConnection();
+database.sequelizeConnection();
 
 // Error Handler.
 app.use(errorHandler());
