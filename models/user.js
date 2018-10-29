@@ -8,6 +8,8 @@ const User = new Schema({
   name: String,
   access_token:String,
   refresh_token:String,
+  oauth_token:String,
+  oauth_verifier:String,
   status:Boolean
 });
 

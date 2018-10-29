@@ -16,6 +16,7 @@ const passport = require('passport');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const router = express.Router();
+ const User = require('./models/user');
 require("express-group-routes");
 
 
@@ -26,7 +27,7 @@ dotEnv.load({ path: ".env" });
 const app = express();
 
 // *** mongoose *** //
-mongoose.connect(`mongodb://${process.env.MLAB_USER}:${process.env.MLAB_PASSWORD}@ds145083.mlab.com:45083/twitter`,{ useNewUrlParser: true });
+mongoose.connect(`mongodb://${process.env.MLAB_USER}:${process.env.MLAB_PASSWORD}@ds145463.mlab.com:45463/twitter`,{ useNewUrlParser: true });
 
 // enable cors
 const corsOption = {
@@ -56,7 +57,6 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-
 app.use(
   sass({
     src: path.join(__dirname, "public"),
@@ -73,24 +73,97 @@ app.disable("etag");
 // Controllers (route handlers).
 const twitter = require("./controllers/twitterController");
 
-
-
 // Index Route
 app.get("/", (req, res) => {
  res.status(200).send('Hello World');
 });
 
+// Index Route
+app.get("/login", (req, res) => {
+  return res
+    .status(200)
+    .send(
+    this.createJsonObject(
+      [],
+      "Login please",
+      "/login",
+      200,
+      false,
+      {}
+    )
+  );
+});
+
 // Version 1 API
 app.group("/api/v1", router => {
+  
   router.get("/auth/twitter", twitter.authenticate('twitter'));
   router.get('/auth/twitter/callback',
-  twitter.authenticate('twitter', { failureRedirect: '/' }),
+  twitter.authenticate('twitter', { failureRedirect: '/login' }),
   function(req, res) {
-    res.status(200).json(req.user);
+    // Successful authentication
+    console.log(req.session.passport)
+    const searchQuery = {
+      twitter_id: req.user.twitter_id
+    };
+    
+    
+    const updates = {
+      oauth_token:req.query.oauth_token,
+      oauth_verifier:req.query.oauth_verifier
+    };
+    
+    const options = {
+      upsert: true
+    };
+    
+    // update the user if s/he exists or add a new user
+    User.findOneAndUpdate(searchQuery, updates, options, function(err, user) {
+      if(err) {
+        res.status(500).send('error');
+        return res
+          .status(500)
+          .send(
+          this.createJsonObject(
+          [],
+      "Oops our bad!!!",
+      "/auth/twitter/callback",
+      500,
+      false,
+      {}
+    )
+  );
+  
+      } else {
+         return res
+    .status(200)
+    .send(
+    this.createJsonObject(
+      [],
+      "Successful",
+      "/auth/twitter/callback",
+      200,
+      true,
+      {}
+    )
+  );
+      }
+    });
   });
 });
 
 
+// Create Json Object
+module.exports.createJsonObject = (data, msg, location, code, bool, metadata) => {
+  return JSON.stringify({
+    results: data,
+    message: msg,
+    requestLocation: location,
+    status: code,
+    bool: bool,
+    metadata: metadata
+  });
+};
 
 // Error Handler.
 app.use(errorHandler());

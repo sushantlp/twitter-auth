@@ -19,21 +19,27 @@ passport.use(new TwitterStrategy({
         twitter_id: profile.id,
         name: profile.displayName,
         access_token:accessToken,
-        refresh_token:refreshToken
+        refresh_token:refreshToken,
+        oauth_token:"",
+        oauth_verifier:"",
+        status:true
     };
 
     const options = {
       upsert: true
     };
-
+    
     // update the user if s/he exists or add a new user
     User.findOneAndUpdate(searchQuery, updates, options, function(err, user) {
       if(err) {
+        console.log("Error")
         return done(err);
       } else {
+         console.log("Success")
         return done(null, user);
       }
     });
+    return 
   }
 
 ));
