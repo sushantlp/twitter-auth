@@ -71,7 +71,6 @@ app.disable("etag");
 
 
 // Controllers (route handlers).
-const database = require("./controllers/databaseController");
 const twitter = require("./controllers/twitterController");
 
 
@@ -84,19 +83,14 @@ app.get("/", (req, res) => {
 // Version 1 API
 app.group("/api/v1", router => {
   router.get("/auth/twitter", twitter.authenticate('twitter'));
-  
   router.get('/auth/twitter/callback',
-  twitter.authenticate('twitter', { failureRedirect: '/login' }),
+  twitter.authenticate('twitter', { failureRedirect: '/' }),
   function(req, res) {
-    // Successful authentication
-    console.log("Callback");
-    console.log(req.user)
     res.status(200).json(req.user);
   });
 });
 
-// Call Sequelize Connection
-database.sequelizeConnection();
+
 
 // Error Handler.
 app.use(errorHandler());
