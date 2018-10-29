@@ -12,7 +12,11 @@ const favicon = require("serve-favicon");
 const robots = require("express-robots");
 const sass = require("node-sass-middleware");
 const cors = require('cors');
+const passport = require('passport');
+const session = require('express-session');
+const mongoose = require('mongoose');
 const router = express.Router();
+require("express-group-routes");
 
 
 // Load environment variables from .env file, where API keys and passwords are configured.
@@ -20,6 +24,9 @@ dotEnv.load({ path: ".env" });
 
 // Create Express server.
 const app = express();
+
+// *** mongoose *** //
+mongoose.connect(`mongodb://${process.env.MLAB_USER}:${process.env.MLAB_PASSWORD}@ds145083.mlab.com:45083/twitter`,{ useNewUrlParser: true });
 
 // enable cors
 const corsOption = {
@@ -41,6 +48,14 @@ app.use(expressStatusMonitor());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use(session({
+  secret: 'keyboard cat',
+  resave: true,
+  saveUninitialized: true
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 app.use(
   sass({
@@ -57,15 +72,28 @@ app.disable("etag");
 
 // Controllers (route handlers).
 const database = require("./controllers/databaseController");
+const twitter = require("./controllers/twitterController");
 
-router.route('/' , (req, res)  => {
-  res.status(200);
-  res.send('Hello World');
+
+
+// Index Route
+app.get("/", (req, res) => {
+ res.status(200).send('Hello World');
 });
 
-
-
-
+// Version 1 API
+app.group("/api/v1", router => {
+  router.get("/auth/twitter", twitter.authenticate('twitter'));
+  
+  router.get('/auth/twitter/callback',
+  twitter.authenticate('twitter', { failureRedirect: '/login' }),
+  function(req, res) {
+    // Successful authentication
+    console.log("Callback");
+    console.log(req.user)
+    res.status(200).json(req.user);
+  });
+});
 
 // Call Sequelize Connection
 database.sequelizeConnection();
@@ -90,7 +118,6 @@ if (process.env.APP_ENV.toUpperCase() == "PROD") {
   });
 }
 
-app.use('/api/v1', router);
 
 // Export
 module.exports = app;
