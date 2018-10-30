@@ -1,9 +1,13 @@
 "use strict";
 
+const OAuth = require('oauth');
 const passport = require('passport');
+const Twitter = require('twitter');
 const TwitterStrategy = require('passport-twitter').Strategy;
 const User = require('../models/user');
 const init = require('./init');
+
+const share = require("./shareController");
 
 passport.use(new TwitterStrategy({
     consumerKey: process.env.CONSUMER_KEY,
@@ -45,6 +49,36 @@ passport.use(new TwitterStrategy({
 ));
 
 // serialize user into the session
-init();
+init()
 
 module.exports = passport;
+
+
+module.exports.requestGetTweet = async (req, res,next) => {
+    
+ const client = new Twitter({
+    consumer_key: process.env.CONSUMER_KEY,
+    consumer_secret: process.env.CONSUMER_SECRET,
+    access_token_key: '463715583-lpjWNp6vWoh2uft7NAQEfSw5oiYt5ET3fOzDwiHY',
+    access_token_secret: 'iair44vEaTyWsa6E9xRmu7dhP7XzCiBLvYkQLgJuYng3J'
+});
+    
+    const params = {screen_name: 'sushant singh chauhan'};
+    client.get('statuses/user_timeline', params, function(error, tweets, response) {
+    if (!error) {
+        console.log(tweets);
+    
+        return res.send(tweets)
+    }
+});
+
+ 
+    
+ 
+
+ 
+  
+ 
+}
+
+

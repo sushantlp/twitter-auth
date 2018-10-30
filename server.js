@@ -17,6 +17,7 @@ const session = require('express-session');
 const mongoose = require('mongoose');
 const router = express.Router();
  const User = require('./models/user');
+ 
 require("express-group-routes");
 
 
@@ -72,6 +73,7 @@ app.disable("etag");
 
 // Controllers (route handlers).
 const twitter = require("./controllers/twitterController");
+const share = require("./controllers/shareController");
 
 // Index Route
 app.get("/", (req, res) => {
@@ -83,7 +85,7 @@ app.get("/login", (req, res) => {
   return res
     .status(200)
     .send(
-    this.createJsonObject(
+    share.createJsonObject(
       [],
       "Login please",
       "/login",
@@ -96,7 +98,8 @@ app.get("/login", (req, res) => {
 
 // Version 1 API
 app.group("/api/v1", router => {
-  
+   
+   router.get("/get/twitter", twitter.requestGetTweet);
   router.get("/auth/twitter", twitter.authenticate('twitter'));
   router.get('/auth/twitter/callback',
   twitter.authenticate('twitter', { failureRedirect: '/login' }),
@@ -124,7 +127,7 @@ app.group("/api/v1", router => {
         return res
           .status(500)
           .send(
-          this.createJsonObject(
+          share.createJsonObject(
           [],
       "Oops our bad!!!",
       "/auth/twitter/callback",
@@ -138,7 +141,7 @@ app.group("/api/v1", router => {
          return res
     .status(200)
     .send(
-    this.createJsonObject(
+    share.createJsonObject(
       [],
       "Successful",
       "/auth/twitter/callback",
@@ -153,17 +156,7 @@ app.group("/api/v1", router => {
 });
 
 
-// Create Json Object
-module.exports.createJsonObject = (data, msg, location, code, bool, metadata) => {
-  return JSON.stringify({
-    results: data,
-    message: msg,
-    requestLocation: location,
-    status: code,
-    bool: bool,
-    metadata: metadata
-  });
-};
+
 
 // Error Handler.
 app.use(errorHandler());
