@@ -47,7 +47,7 @@ MLAB_PASSWORD=sushant123
 
 ```
 
-```bash
+```API 
 > https://twitter-auth-sushantlp.c9users.io/api/v1/auth/twitter
 > https://twitter-auth-sushantlp.c9users.io/api/v1/get/twitter
 ```
