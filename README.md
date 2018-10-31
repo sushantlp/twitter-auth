@@ -42,7 +42,12 @@ MLAB_USER=sushantdb
 MLAB_PASSWORD=sushant123
 ```
 
-https://twitter-auth-sushantlp.c9users.io/api/v1/auth/twitter
-https://twitter-auth-sushantlp.c9users.io/api/v1/get/twitter
 
+
+
+```
+
+```bash
+> https://twitter-auth-sushantlp.c9users.io/api/v1/auth/twitter
+> https://twitter-auth-sushantlp.c9users.io/api/v1/get/twitter
 ```
