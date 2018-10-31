@@ -82,18 +82,30 @@ const share = require("./controllers/shareController");
 
 // Index Route
 app.get("/", (req, res) => {
-  res.status(200).send("Hello World");
+  return res
+    .status(200)
+    .send(share.createJsonObject([], "Login please", "/", 200, false, {}));
 });
 
 // Index Route
 app.get("/login", (req, res) => {
-  return res.status(200).send("Login please");
+  return res
+    .status(200)
+    .send(share.createJsonObject([], "Login please", "/login", 200, false, {}));
 });
 
 // Version 1 API
 app.group("/api/v1", router => {
   router.get("/get/twitter", twitter.requestGetTweet);
   router.get("/auth/twitter", twitter.authenticate("twitter"));
+
+  // router.get("/auth/twitter/callback", function(req, res, next) {
+  //   return passport.authenticate("twitter", {
+  //     successRedirect: "/",
+  //     failureRedirect: "/"
+  //   })(req, res, next);
+  // });
+
   router.get(
     "/auth/twitter/callback",
     twitter.authenticate("twitter", { failureRedirect: "/login" }),
@@ -116,10 +128,20 @@ app.group("/api/v1", router => {
       // update the user if s/he exists or add a new user
       User.findOneAndUpdate(searchQuery, updates, options, function(err, user) {
         if (err) {
-          res.status(500).send("error");
           return res.status(500).send("Oops our bad!!!");
         } else {
-          return res.status(200).send("Successful");
+          return res
+            .status(200)
+            .send(
+              share.createJsonObject(
+                [],
+                "Successful",
+                "/callback",
+                200,
+                true,
+                {}
+              )
+            );
         }
       });
     }
